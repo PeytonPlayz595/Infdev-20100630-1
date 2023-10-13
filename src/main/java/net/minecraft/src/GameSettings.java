@@ -27,15 +27,14 @@ public class GameSettings {
 	public KeyBinding keyBindLoad = new KeyBinding("Load location", 19);
 	public KeyBinding[] keyBindings = new KeyBinding[]{this.keyBindForward, this.keyBindLeft, this.keyBindBack, this.keyBindRight, this.keyBindJump, this.keyBindDrop, this.keyBindInventory, this.keyBindChat, this.keyBindToggleFog, this.keyBindSave, this.keyBindLoad};
 	protected Minecraft mc;
-	//private File optionsFile;
-	public int numberOfOptions = 11;
+	public int numberOfOptions = 12;
 	public int difficulty = 2;
 	public boolean thirdPersonView = false;
 	public boolean highPerformance = false;
+	public boolean mipmap = false;
 
 	public GameSettings(Minecraft var1) {
 		this.mc = var1;
-		//this.optionsFile = new File(mcDataDir, "options.txt");
 		this.loadOptions();
 	}
 
@@ -102,12 +101,16 @@ public class GameSettings {
 			}
 			this.mc.renderGlobal.loadRenderers();
 		}
+		
+		if(var1 == 11) {
+			this.mipmap = !this.mipmap;
+		}
 
 		this.saveOptions();
 	}
 
 	public String getKeyBinding(int var1) {
-		return var1 == 0 ? "Music: " + (this.music ? "ON" : "OFF") : (var1 == 1 ? "Sound: " + (this.sound ? "ON" : "OFF") : (var1 == 2 ? "Invert mouse: " + (this.invertMouse ? "ON" : "OFF") : (var1 == 3 ? "Show FPS: " + (this.showFPS ? "ON" : "OFF") : (var1 == 4 ? "Render distance: " + RENDER_DISTANCES[this.renderDistance] : (var1 == 5 ? "View bobbing: " + (this.viewBobbing ? "ON" : "OFF") : (var1 == 6 ? "3d anaglyph: " + (this.anaglyph ? "ON" : "OFF") : (var1 == 7 ? "Limit framerate: " + (this.limitFramerate ? "ON" : "OFF") : (var1 == 8 ? "Difficulty: " + DIFFICULTIES[this.difficulty] : (var1 == 9 ? "Graphics: " + (this.fancyGraphics ? "FANCY" : "FAST") : (var1 == 10 ? "High Performance Mode: " + (this.highPerformance ? "ON" : "OFF") : ""))))))))));
+		return var1 == 0 ? "Music: " + (this.music ? "ON" : "OFF") : (var1 == 1 ? "Sound: " + (this.sound ? "ON" : "OFF") : (var1 == 2 ? "Invert mouse: " + (this.invertMouse ? "ON" : "OFF") : (var1 == 3 ? "Show FPS: " + (this.showFPS ? "ON" : "OFF") : (var1 == 4 ? "Render distance: " + RENDER_DISTANCES[this.renderDistance] : (var1 == 5 ? "View bobbing: " + (this.viewBobbing ? "ON" : "OFF") : (var1 == 6 ? "3d anaglyph: " + (this.anaglyph ? "ON" : "OFF") : (var1 == 7 ? "Limit framerate: " + (this.limitFramerate ? "ON" : "OFF") : (var1 == 8 ? "Difficulty: " + DIFFICULTIES[this.difficulty] : (var1 == 9 ? "Graphics: " + (this.fancyGraphics ? "FANCY" : "FAST") : (var1 == 10 ? "High Performance Mode: " + (this.highPerformance ? "ON" : "OFF") : (var1 == 11 ? "MipMap: " + (this.mipmap ? "ON" : "OFF") : "")))))))))));
 	}
 
 	public void loadOptions() {

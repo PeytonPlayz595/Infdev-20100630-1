@@ -39,9 +39,9 @@ public class RenderEngine {
 				setupTexture(readTextureImage(LWJGLMain.loadResourceBytes(s.substring(7))), i);
 				clampTexture = false;
 			} else {
-				//if(s.equals("/terrain.png")) {
-					//useMipmaps = true;
-				//}
+				if(s.equals("/terrain.png") && Minecraft.getMinecraft().gameSettings.mipmap) {
+					useMipmaps = true;
+				}
 				setupTexture(readTextureImage(LWJGLMain.loadResourceBytes(s)), i);
 				useMipmaps = false;
 			}
