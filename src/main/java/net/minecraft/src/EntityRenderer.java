@@ -361,14 +361,18 @@ public class EntityRenderer {
 				var3.renderSky(var1);
 			}
 
-			GL11.glEnable(GL11.GL_FOG);
+			if(!this.mc.gameSettings.highPerformance) {
+				GL11.glEnable(GL11.GL_FOG);
+			}
 			this.setupFog(1);
 			Frustrum var12 = new Frustrum();
 			var12.setPosition(var5, var7, var9);
 			this.mc.renderGlobal.clipRenderersByFrustrum(var12, var1);
 			this.mc.renderGlobal.updateRenderers(var2, false);
 			this.setupFog(0);
-			GL11.glEnable(GL11.GL_FOG);
+			if(!this.mc.gameSettings.highPerformance) {
+				GL11.glEnable(GL11.GL_FOG);
+			}
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/terrain.png"));
 			RenderHelper.disableStandardItemLighting();
 			var3.sortAndRender(var2, 0, (double)var1);
@@ -428,7 +432,9 @@ public class EntityRenderer {
 			}
 
 			this.setupFog(0);
-			GL11.glEnable(GL11.GL_FOG);
+			if(!this.mc.gameSettings.highPerformance) {
+				GL11.glEnable(GL11.GL_FOG);
+			}
 			var3.renderClouds(var1);
 			GL11.glDisable(GL11.GL_FOG);
 			this.setupFog(1);

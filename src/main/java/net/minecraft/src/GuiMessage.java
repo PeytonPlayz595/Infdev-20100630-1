@@ -31,11 +31,11 @@ public class GuiMessage extends GuiScreen {
 	
 	public void drawScreen(int var1, int var2, float var3) {
 		this.drawDefaultBackground();
-		this.drawCenteredString(fontRenderer, title1, this.width / 2 - 5, 70, 16777215);
+		this.drawCenteredString(fontRenderer, title1, this.width / 2, 70, 16777215);
 		int i = 90;
 		
 		for (Object s : this.listLines2) {
-            this.drawCenteredString(this.fontRenderer, (String) s, this.width / 2 - 5, i, 16777215);
+            this.drawCenteredString(this.fontRenderer, (String) s, this.width / 2, i, 16777215);
             i += 9;
         }
 		

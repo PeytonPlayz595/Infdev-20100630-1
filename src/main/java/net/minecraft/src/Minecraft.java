@@ -477,6 +477,11 @@ public class Minecraft implements Runnable {
 	}
 
 	public void runTick() {
+		
+		if(this.mc.gameSettings.highPerformance) {
+			GL11.glDisable(GL11.GL_FOG);
+		}
+		
 		this.ingameGUI.updateTick();
 		if(!this.isGamePaused && this.theWorld != null) {
 			this.playerController.onUpdate();
@@ -612,11 +617,11 @@ public class Minecraft implements Runnable {
 
 		if(this.theWorld != null) {
 			this.theWorld.difficultySetting = this.gameSettings.difficulty;
-			if(!this.isGamePaused) {
+			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
 				this.entityRenderer.updateRenderer();
 			}
 
-			if(!this.isGamePaused) {
+			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
 				this.renderGlobal.updateClouds();
 			}
 
@@ -628,11 +633,11 @@ public class Minecraft implements Runnable {
 				this.theWorld.tick();
 			}
 
-			if(!this.isGamePaused) {
+			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
 				this.theWorld.randomDisplayUpdates(MathHelper.floor_double(this.thePlayer.posX), MathHelper.floor_double(this.thePlayer.posY), MathHelper.floor_double(this.thePlayer.posZ));
 			}
 
-			if(!this.isGamePaused) {
+			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
 				this.effectRenderer.updateEffects();
 			}
 		}

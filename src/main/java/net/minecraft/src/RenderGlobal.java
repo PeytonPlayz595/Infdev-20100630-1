@@ -105,6 +105,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	private void renderStars() {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		Random var1 = new Random(10842L);
 		Tessellator var2 = Tessellator.instance;
 		var2.startDrawingQuads();
@@ -248,6 +251,9 @@ public class RenderGlobal implements IWorldAccess {
 		TileEntityRenderer.staticPlayerZ = var4.lastTickPosZ + (var4.posZ - var4.lastTickPosZ) * (double)var3;
 		List var5 = this.theWorld.getLoadedEntityList();
 		this.countEntitiesTotal = var5.size();
+		if(this.mc.gameSettings.highPerformance) {
+			GL11.glDisable(GL11.GL_FOG);
+		}
 
 		int var6;
 		for(var6 = 0; var6 < var5.size(); ++var6) {
@@ -414,10 +420,16 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void updateClouds() {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		++this.cloudTickCounter;
 	}
 
 	public void renderSky(float var1) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		Vec3D var2 = this.theWorld.getSkyColor(var1);
 		float var3 = (float)var2.xCoord;
@@ -437,7 +449,9 @@ public class RenderGlobal implements IWorldAccess {
 		GL11.glColor3f(var3, var4, var5);
 		Tessellator var12 = Tessellator.instance;
 		GL11.glDepthMask(false);
-		GL11.glEnable(GL11.GL_FOG);
+		if(!this.mc.gameSettings.highPerformance) {
+			GL11.glEnable(GL11.GL_FOG);
+		}
 		GL11.glColor3f(var3, var4, var5);
 		GL11.glCallList(this.glSkyList);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -479,7 +493,9 @@ public class RenderGlobal implements IWorldAccess {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glEnable(GL11.GL_FOG);
+		if(!this.mc.gameSettings.highPerformance) {
+			GL11.glEnable(GL11.GL_FOG);
+		}
 		GL11.glPopMatrix();
 		GL11.glColor3f(var3 * 0.2F + 0.04F, var4 * 0.2F + 0.04F, var5 * 0.6F + 0.1F);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -489,6 +505,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void renderClouds(float var1) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		if(this.mc.gameSettings.fancyGraphics) {
 			this.renderCloudsFancy(var1);
 		} else {
@@ -544,6 +563,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void renderCloudsFancy(float var1) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		float var2 = (float)(this.mc.thePlayer.lastTickPosY + (this.mc.thePlayer.posY - this.mc.thePlayer.lastTickPosY) * (double)var1);
 		Tessellator var3 = Tessellator.instance;
@@ -706,6 +728,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void drawBlockBreaking(EntityPlayer var1, MovingObjectPosition var2, int var3, ItemStack var4, float var5) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		Tessellator var6 = Tessellator.instance;
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -782,6 +807,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void drawSelectionBox(EntityPlayer var1, MovingObjectPosition var2, int var3, ItemStack var4, float var5) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		if(var3 == 0 && var2.typeOfHit == 0) {
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -806,6 +834,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	private void drawOutlinedBoundingBox(AxisAlignedBB var1) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		Tessellator var2 = Tessellator.instance;
 		var2.startDrawing(3);
 		var2.addVertex(var1.minX, var1.minY, var1.minZ);
@@ -895,6 +926,9 @@ public class RenderGlobal implements IWorldAccess {
 	}
 
 	public void spawnParticle(String var1, double var2, double var4, double var6, double var8, double var10, double var12) {
+		if(this.mc.gameSettings.highPerformance) {
+			return;
+		}
 		double var14 = this.theWorld.playerEntity.posX - var2;
 		double var16 = this.theWorld.playerEntity.posY - var4;
 		double var18 = this.theWorld.playerEntity.posZ - var6;
