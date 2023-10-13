@@ -1,6 +1,9 @@
 package net.minecraft.src;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
@@ -169,4 +172,13 @@ public class FontRenderer {
 	private IntBuffer buffer;
 	
 	public static final char formatChar = '\247';
+
+	public List<String> listFormattedStringToWidth(String title2) {
+		java.util.ArrayList arraylist = new java.util.ArrayList();
+		String[] string = title2.split("\n");
+		for (String list : string) {
+		    arraylist.add(list);
+		}
+		return arraylist;
+	}
 }

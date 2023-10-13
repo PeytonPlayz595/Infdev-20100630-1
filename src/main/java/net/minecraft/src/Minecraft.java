@@ -45,17 +45,19 @@ public class Minecraft implements Runnable {
 	private int mouseTicksRan = 0;
 	public boolean isRaining = false;
 	long systemTime = System.currentTimeMillis();
+	private static Minecraft mc;
 
 	public Minecraft(int var4, int var5, boolean var6) {
 		new ThreadSleepForever(this, "Timer hack thread");
 		this.displayWidth = var4;
 		this.displayHeight = var5;
+		mc = this;
 	}
 
 	public void setServer(String var1, int var2) {
 	}
 
-	public void startGame() throws LWJGLException {
+	public void startGame() {
 		this.gameSettings = new GameSettings(this);
 		this.renderEngine = new RenderEngine(this.gameSettings);
 		this.fontRenderer = new FontRenderer(this.gameSettings, "/default.png", this.renderEngine);
@@ -84,14 +86,14 @@ public class Minecraft implements Runnable {
 		this.renderEngine.registerTextureFX(new TextureFlamesFX(1));
 		this.renderGlobal = new RenderGlobal(this, this.renderEngine);
 		GL11.glViewport(0, 0, this.displayWidth, this.displayHeight);
-		this.displayGuiScreen(new GuiMainMenu());
+		Minecraft.getMinecraft().displayGuiMessage(new GuiMainMenu(), "EARLY BETA TESTING!", "THIS PROJECT IS STILL IN TESTING!\nTHERE WILL BE BUGS!");
 		this.effectRenderer = new EffectRenderer(this.theWorld, this.renderEngine);
 		this.checkGLError("Post startup");
 		this.ingameGUI = new GuiIngame(this);
 		this.playerController.init();
 	}
 
-	private void loadScreen() throws LWJGLException {
+	private void loadScreen() {
 		ScaledResolution var1 = new ScaledResolution(this.displayWidth, this.displayHeight);
 		int var2 = var1.getScaledWidth();
 		int var3 = var1.getScaledHeight();
@@ -149,6 +151,11 @@ public class Minecraft implements Runnable {
 
 		}
 	}
+	
+	public void displayGuiMessage(GuiScreen var1, String var2, String var3) {
+		GuiMessage guimessage = new GuiMessage(var1, var2, var3);
+		this.displayGuiScreen(guimessage);
+	}
 
 	private void checkGLError(String var1) {
 		int var2 = GL11.glGetError();
@@ -172,15 +179,7 @@ public class Minecraft implements Runnable {
 
 	public void run() {
 		this.running = true;
-
-		try {
-			this.startGame();
-		} catch (Exception var10) {
-			var10.printStackTrace();
-			new UnexpectedThrowable("Failed to start game", var10);
-			return;
-		}
-
+		this.startGame();
 		long var1 = System.currentTimeMillis();
 		int var3 = 0;
 
@@ -776,5 +775,9 @@ public class Minecraft implements Runnable {
 		this.thePlayer.movementInput = new MovementInputFromOptions(this.gameSettings);
 		this.playerController.onRespawn(this.thePlayer);
 		this.preloadWorld("Respawning");
+	}
+
+	public static Minecraft getMinecraft() {
+		return mc;
 	}
 }

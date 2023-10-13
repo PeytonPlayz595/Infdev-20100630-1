@@ -10,7 +10,7 @@ public class GuiScreen extends Gui {
 	protected Minecraft mc;
 	public int width;
 	public int height;
-	protected List controlList = new ArrayList();
+	protected List<GuiButton> controlList = new ArrayList<GuiButton>();
 	public boolean allowUserInput = false;
 	protected FontRenderer fontRenderer;
 
