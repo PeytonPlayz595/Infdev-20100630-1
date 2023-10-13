@@ -67,7 +67,7 @@ public class ChunkLoader implements IChunkLoader {
 	public void saveChunk(World var1, Chunk var2) {
 		NBTTagCompound toSave = new NBTTagCompound();
 		storeChunkInCompound(var2, var1, toSave);
-		ByteArrayOutputStream bao = new ByteArrayOutputStream(131072);
+		ByteArrayOutputStream bao = new ByteArrayOutputStream(98304);
 		try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(bao))) {
 			NBTBase.writeNamedTag(toSave, dos);
 			dos.flush();

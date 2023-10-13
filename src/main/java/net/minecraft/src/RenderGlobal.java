@@ -21,8 +21,6 @@ public class RenderGlobal implements IWorldAccess {
 	private int glRenderListBase;
 	private Minecraft mc;
 	private RenderBlocks globalRenderBlocks;
-	//private IntBuffer glOcclusionQueryBase;
-	//private boolean occlusionEnabled = false;
 	private int cloudTickCounter = 0;
 	private int starGLCallList;
 	private int glSkyList;
@@ -45,7 +43,6 @@ public class RenderGlobal implements IWorldAccess {
 	private int renderersBeingRendered;
 	private int renderersSkippingRenderPass;
 	private List glRenderLists = new ArrayList();
-	//private RenderList[] allRenderLists = new RenderList[]{new RenderList(), new RenderList(), new RenderList(), new RenderList()};
 	int dummyRenderInt = 0;
 	int unusedGLCallList = GLAllocation.generateDisplayLists(1);
 	double prevSortX = -9999.0D;
@@ -53,12 +50,24 @@ public class RenderGlobal implements IWorldAccess {
 	double prevSortZ = -9999.0D;
 	public float damagePartialTime;
 	int frustumCheckOffset = 0;
+	private int[] glOcclusionQuery;
+	
+	private int field_21156_R;
+	private boolean field_1436_w;
+	private int field_1418_O;
 
 	public RenderGlobal(Minecraft var1, RenderEngine var2) {
+		field_1436_w = true;
 		this.mc = var1;
 		this.renderEngine = var2;
 		byte var3 = 64;
 		this.glRenderListBase = GLAllocation.generateDisplayLists(var3 * var3 * var3 * 3);
+		this.glOcclusionQuery = new int[var3 * var3 * var3]; 
+		for(int i = 0; i < glOcclusionQuery.length; ++i) {
+			this.glOcclusionQuery[i] = -1;
+		}
+		this.occlusionQueryAvailable = new boolean[glOcclusionQuery.length];
+		this.occlusionQueryStalled = new long[occlusionQueryAvailable.length];
 		this.starGLCallList = GLAllocation.generateDisplayLists(3);
 		GL11.glPushMatrix();
 		GL11.glNewList(this.starGLCallList, GL11.GL_COMPILE);
@@ -215,15 +224,25 @@ public class RenderGlobal implements IWorldAccess {
 						this.tileEntities.removeAll(this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].tileEntityRenderers);
 					}
 
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4] = new WorldRenderer(this.theWorld, this.tileEntities, var4 * 16, var5 * 16, var6 * 16, 16, this.glRenderListBase + var2);
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isWaitingOnOcclusionQuery = false;
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isVisible = true;
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isInFrustum = true;
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].chunkIndex = var3++;
-					this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].markDirty();
-					this.sortedWorldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4] = this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4];
-					this.worldRenderersToUpdate.add(this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4]);
-					var2 += 3;
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4] = new WorldRenderer(this.theWorld, this.tileEntities, var4 * 16, var5 * 16, var6 * 16, 16, this.glRenderListBase + var2);
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isWaitingOnOcclusionQuery = false;
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isVisible = true;
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].isInFrustum = true;
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].chunkIndex = var3++;
+					//this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4].markDirty();
+					//this.sortedWorldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4] = this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4];
+					//this.worldRenderersToUpdate.add(this.worldRenderers[(var6 * this.renderChunksTall + var5) * this.renderChunksWide + var4]);
+					int idx = (var6 * renderChunksTall + var5) * renderChunksWide + var4;
+					worldRenderers[idx] = new WorldRenderer(theWorld, tileEntities, var4 * 16, var5 * 16, var6 * 16, 16, glRenderListBase + var2);
+					worldRenderers[idx].isWaitingOnOcclusionQuery = false;
+					worldRenderers[idx].isVisible = 100;
+					worldRenderers[idx].isNowVisible = true;
+					worldRenderers[idx].isInFrustum = true;
+					worldRenderers[idx].chunkIndex = var3++;
+					worldRenderers[idx].markDirty();
+					sortedWorldRenderers[idx] = worldRenderers[idx];
+					worldRenderersToUpdate.add(worldRenderers[idx]);
+					var2 += 2;
 				}
 			}
 		}
@@ -346,36 +365,138 @@ public class RenderGlobal implements IWorldAccess {
 		}
 
 	}
+	
+	private long lastOcclusionQuery = 0l;
+	private boolean[] occlusionQueryAvailable;
+	private long[] occlusionQueryStalled;
 
-	public int sortAndRender(EntityPlayer var1, int var2, double var3) {
-		if(this.mc.gameSettings.renderDistance != this.renderDistance) {
-			this.loadRenderers();
+	public int sortAndRender(EntityLiving var1, int var2, double var3) {
+		for (int j = 0; j < 10; j++) {
+			field_21156_R = (field_21156_R + 1) % worldRenderers.length;
+			WorldRenderer worldrenderer = worldRenderers[field_21156_R];
+			if (worldrenderer.needsUpdate && !worldRenderersToUpdate.contains(worldrenderer)) {
+				worldRenderersToUpdate.add(worldrenderer);
+			}
 		}
 
+		if (mc.gameSettings.renderDistance != renderDistance) {
+			loadRenderers();
+		}
+		if (var2 == 0) {
+			renderersLoaded = 0;
+			renderersBeingClipped = 0;
+			field_1418_O = 0;
+			renderersBeingRendered = 0;
+			renderersSkippingRenderPass = 0;
+		}
+		double d1 = var1.lastTickPosX + (var1.posX - var1.lastTickPosX) * var2;
+		double d2 = var1.lastTickPosY + (var1.posY - var1.lastTickPosY) * var2;
+		double d3 = var1.lastTickPosZ + (var1.posZ - var1.lastTickPosZ) * var2;
+		double d4 = var1.posX - prevSortX;
+		double d5 = var1.posY - prevSortY;
+		double d6 = var1.posZ - prevSortZ;
+
+		int fx = MathHelper.floor_double(d1);
+		int fy = MathHelper.floor_double(d2);
+		int fz = MathHelper.floor_double(d3);
+		
+		if (d4 * d4 + d5 * d5 + d6 * d6 > 16D) {
+			prevSortX = var1.posX;
+			prevSortY = var1.posY;
+			prevSortZ = var1.posZ;
+			markRenderersForNewPosition(fx, fy, fz);
+			Arrays.sort(sortedWorldRenderers, new EntitySorter(var1));
+		}
+		
+		fx = fx >> 4;
+		fy = MathHelper.floor_double(d2 + var1.getEyeHeight()) >> 4;
+		fz = fz >> 4;
+
+		long queryRate = 50l;
+		long stallRateVisible = 50l;
+		long stallRate = 500l;
+		int cooldownRate = 10;
+		
+		long ct = System.currentTimeMillis();
 		if(var2 == 0) {
-			this.renderersLoaded = 0;
-			this.renderersBeingClipped = 0;
-			this.renderersBeingOccluded = 0;
-			this.renderersBeingRendered = 0;
-			this.renderersSkippingRenderPass = 0;
+			for (int j = 0; j < this.sortedWorldRenderers.length; ++j) {
+				WorldRenderer c = this.sortedWorldRenderers[j];
+				int ccx = c.chunkX - fx;
+				int ccy = c.chunkY - fy;
+				int ccz = c.chunkZ - fz;
+				if((ccx < 2 && ccx > -2 && ccy < 2 && ccy > -2 && ccz < 2 && ccz > -2) || glOcclusionQuery[c.chunkIndex] == -1) {
+					c.isNowVisible = true;
+					c.isVisible = cooldownRate;
+				}else if(!c.skipAllRenderPasses() && c.isInFrustum) {
+					if(occlusionQueryAvailable[c.chunkIndex]) {
+						if(GL11.glGetQueryResultAvailable(glOcclusionQuery[c.chunkIndex])) {
+							if(GL11.glGetQueryResult(glOcclusionQuery[c.chunkIndex])) {
+								c.isNowVisible = true;
+								c.isVisible = cooldownRate;
+							}else {
+								if(c.isVisible <= 0) {
+									c.isNowVisible = false;
+								}
+							}
+							occlusionQueryAvailable[c.chunkIndex] = false;
+							occlusionQueryStalled[c.chunkIndex] = 0l;
+						}else if(occlusionQueryStalled[c.chunkIndex] != 0l && ct - occlusionQueryStalled[c.chunkIndex] > stallRateVisible) {
+							c.isNowVisible = true;
+							c.isVisible = cooldownRate;
+						}
+					}
+				}
+			}
 		}
-
-		double var5 = var1.lastTickPosX + (var1.posX - var1.lastTickPosX) * var3;
-		double var7 = var1.lastTickPosY + (var1.posY - var1.lastTickPosY) * var3;
-		double var9 = var1.lastTickPosZ + (var1.posZ - var1.lastTickPosZ) * var3;
-		double var11 = var1.posX - this.prevSortX;
-		double var13 = var1.posY - this.prevSortY;
-		double var15 = var1.posZ - this.prevSortZ;
-		if(var11 * var11 + var13 * var13 + var15 * var15 > 16.0D) {
-			this.prevSortX = var1.posX;
-			this.prevSortY = var1.posY;
-			this.prevSortZ = var1.posZ;
-			this.markRenderersForNewPosition(MathHelper.floor_double(var1.posX), MathHelper.floor_double(var1.posY), MathHelper.floor_double(var1.posZ));
-			Arrays.sort(this.sortedWorldRenderers, new EntitySorter(var1));
+		
+		int k = renderSortedRenderers(0, this.sortedWorldRenderers.length, var2, var2);
+		
+		d2 -= var1.getEyeHeight();
+		
+		if(var2 == 0 && ct - lastOcclusionQuery > queryRate) {
+			lastOcclusionQuery = ct;
+			GL11.glEnable(GL11.GL_CULL_FACE);
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glColorMask(false, false, false, false);
+			GL11.glDepthMask(false);
+			GL11.glBindOcclusionBB();
+			for (int j = 0; j < this.sortedWorldRenderers.length; ++j) {
+				WorldRenderer c = this.sortedWorldRenderers[j];
+				int ccx = c.chunkX - fx;
+				int ccy = c.chunkY - fy;
+				int ccz = c.chunkZ - fz;
+				if(!c.skipAllRenderPasses() && c.isInFrustum && !(ccx < 2 && ccx > -2 && ccy < 2 && ccy > -2 && ccz < 2 && ccz > -2)) {
+					boolean stalled = false;
+					if(occlusionQueryAvailable[c.chunkIndex]) {
+						if(occlusionQueryStalled[c.chunkIndex] == 0l) {
+							occlusionQueryStalled[c.chunkIndex] = ct;
+							stalled = true;
+						}else if(ct - occlusionQueryStalled[c.chunkIndex] < stallRate) {
+							stalled = true;
+						}
+					}
+					if(!stalled) {
+						occlusionQueryAvailable[c.chunkIndex] = true;
+						int q = glOcclusionQuery[c.chunkIndex];
+						if(q == -1) {
+							q = glOcclusionQuery[c.chunkIndex] = GL11.glCreateQuery();
+						}
+						GL11.glBeginQuery(q);
+						GL11.glDrawOcclusionBB((float)(c.posX - d1), (float)(c.posY - d2), (float)(c.posZ - d3), 16, 16, 16);
+						GL11.glEndQuery();
+					}
+				}
+				if(c.isVisible > 0) {
+					--c.isVisible;
+				}
+			}
+			GL11.glEndOcclusionBB();
+			GL11.glColorMask(true, true, true, true);
+			GL11.glDepthMask(true);
+			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
-
-		byte var17 = 0;
-		return var17 + this.renderSortedRenderers(0, this.sortedWorldRenderers.length, var2, var3);
+		
+		return k;
 	}
 
 	private int renderSortedRenderers(int var1, int var2, int var3, double var4) {
@@ -389,12 +510,14 @@ public class RenderGlobal implements IWorldAccess {
 					++this.renderersSkippingRenderPass;
 				} else if(!this.sortedWorldRenderers[var7].isInFrustum) {
 					++this.renderersBeingClipped;
+				} if (field_1436_w && !sortedWorldRenderers[var7].isNowVisible) {
+					field_1418_O++;
 				} else {
 					++this.renderersBeingRendered;
 				}
 			}
 
-			if(!this.sortedWorldRenderers[var7].skipRenderPass[var3] && this.sortedWorldRenderers[var7].isInFrustum && this.sortedWorldRenderers[var7].isVisible) {
+			if(!this.sortedWorldRenderers[var7].skipRenderPass[var3] && this.sortedWorldRenderers[var7].isInFrustum && this.sortedWorldRenderers[var7].isNowVisible) {
 				int var8 = this.sortedWorldRenderers[var7].getGLCallListForPass(var3);
 				if(var8 >= 0) {
 					this.glRenderLists.add(this.sortedWorldRenderers[var7]);

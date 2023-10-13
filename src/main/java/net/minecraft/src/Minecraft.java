@@ -207,7 +207,9 @@ public class Minecraft implements Runnable {
 
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			if(this.theWorld != null) {
-				while(this.theWorld.updatingLighting()) {
+				if(!this.gameSettings.highPerformance) {
+					while(this.theWorld.updatingLighting()) {
+					}
 				}
 			}
 
@@ -477,11 +479,6 @@ public class Minecraft implements Runnable {
 	}
 
 	public void runTick() {
-		
-		if(this.mc.gameSettings.highPerformance) {
-			GL11.glDisable(GL11.GL_FOG);
-		}
-		
 		this.ingameGUI.updateTick();
 		if(!this.isGamePaused && this.theWorld != null) {
 			this.playerController.onUpdate();
@@ -633,11 +630,11 @@ public class Minecraft implements Runnable {
 				this.theWorld.tick();
 			}
 
-			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
+			if(!this.isGamePaused) {
 				this.theWorld.randomDisplayUpdates(MathHelper.floor_double(this.thePlayer.posX), MathHelper.floor_double(this.thePlayer.posY), MathHelper.floor_double(this.thePlayer.posZ));
 			}
 
-			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
+			if(!this.isGamePaused) {
 				this.effectRenderer.updateEffects();
 			}
 		}

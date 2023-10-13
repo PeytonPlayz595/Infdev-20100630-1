@@ -101,11 +101,13 @@ public class Chunk {
 	}
 
 	private void checkSkylightNeighborHeight(int var1, int var2, int var3) {
-		int var4 = this.worldObj.getHeightValue(var1, var2);
-		if(var4 > var3) {
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var3, var2, var1, var4, var2);
-		} else if(var4 < var3) {
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var4, var2, var1, var3, var2);
+		if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+			int var4 = this.worldObj.getHeightValue(var1, var2);
+			if(var4 > var3) {
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var3, var2, var1, var4, var2);
+			} else if(var4 < var3) {
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var4, var2, var1, var3, var2);
+			}
 		}
 
 		this.isModified = true;
@@ -151,7 +153,9 @@ public class Chunk {
 					this.skylightMap.set(var1, var8, var3, 15);
 				}
 			} else {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6, var4, var7, var6, var5, var7);
+				if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+					this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6, var4, var7, var6, var5, var7);
+				}
 
 				for(var8 = var4; var8 < var5; ++var8) {
 					this.skylightMap.set(var1, var8, var3, 0);
@@ -179,7 +183,9 @@ public class Chunk {
 			}
 
 			if(var5 != var9) {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6 - 1, var5, var7 - 1, var6 + 1, var9, var7 + 1);
+				if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+					this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6 - 1, var5, var7 - 1, var6 + 1, var9, var7 + 1);
+				}
 			}
 
 			this.isModified = true;
@@ -213,8 +219,10 @@ public class Chunk {
 				this.relightBlock(var1, var2, var3);
 			}
 
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var9, var2, var10, var9, var2, var10);
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var9, var2, var10, var9, var2, var10);
+			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var9, var2, var10, var9, var2, var10);
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var9, var2, var10, var9, var2, var10);
+			}
 			this.updateSkylight_do(var1, var3);
 			if(var4 != 0) {
 				Block.blocksList[var4].onBlockAdded(this.worldObj, var9, var2, var10);
@@ -248,8 +256,10 @@ public class Chunk {
 				this.relightBlock(var1, var2, var3);
 			}
 
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var8, var2, var9, var8, var2, var9);
-			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var8, var2, var9, var8, var2, var9);
+			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var8, var2, var9, var8, var2, var9);
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var8, var2, var9, var8, var2, var9);
+			}
 			this.updateSkylight_do(var1, var3);
 			if(var4 != 0) {
 				Block.blocksList[var4].onBlockAdded(this.worldObj, var8, var2, var9);

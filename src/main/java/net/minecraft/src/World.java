@@ -532,8 +532,10 @@ public class World implements IBlockAccess {
 				}
 			}
 
-			if(this.getSavedLightValue(var1, var2, var3, var4) != var5) {
-				this.scheduleLightingUpdate(var1, var2, var3, var4, var2, var3, var4);
+			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
+				if(this.getSavedLightValue(var1, var2, var3, var4) != var5) {
+					this.scheduleLightingUpdate(var1, var2, var3, var4, var2, var3, var4);
+				}
 			}
 
 		}
