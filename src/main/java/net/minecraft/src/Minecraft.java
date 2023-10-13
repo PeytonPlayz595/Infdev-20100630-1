@@ -617,7 +617,7 @@ public class Minecraft implements Runnable {
 
 		if(this.theWorld != null) {
 			this.theWorld.difficultySetting = this.gameSettings.difficulty;
-			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
+			if(!this.isGamePaused) {
 				this.entityRenderer.updateRenderer();
 			}
 
