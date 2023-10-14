@@ -1886,7 +1886,10 @@ public class LWJGLMain {
 	}
 	
 	public static final void writeFile(String path, byte[] data) {
-		IndexedDBFilesystem.writeFile(path, data);
+		Thread thread = new Thread(() -> {
+			IndexedDBFilesystem.writeFile(path, data);
+	    });
+	    thread.start();
 	}
 	
 	public static final byte[] readFile(String path) {
@@ -1902,15 +1905,24 @@ public class LWJGLMain {
 	}
 	
 	public static final void renameFile(String oldPath, String newPath) {
-		IndexedDBFilesystem.renameFile(oldPath, newPath);
+		Thread thread = new Thread(() -> {
+			IndexedDBFilesystem.renameFile(oldPath, newPath);
+	    });
+	    thread.start();
 	}
 	
 	public static final void copyFile(String oldPath, String newPath) {
-		IndexedDBFilesystem.copyFile(oldPath, newPath);
+		Thread thread = new Thread(() -> {
+			IndexedDBFilesystem.copyFile(oldPath, newPath);
+	    });
+	    thread.start();
 	}
 	
 	public static final void deleteFile(String path) {
-		IndexedDBFilesystem.deleteFile(path);
+		Thread thread = new Thread(() -> {
+			IndexedDBFilesystem.deleteFile(path);
+	    });
+	    thread.start();
 	}
 
 	public static final Collection<FileEntry> listFiles(String path, boolean listDirs, boolean recursiveDirs) {
