@@ -55,11 +55,7 @@ public class ChunkProviderIso implements IChunkProvider {
 	public boolean saveChunks(boolean var1, IProgressUpdate var2) {
 		return true;
 	}
-
-	public boolean unload100OldestChunks() {
-		return false;
-	}
-
+	
 	public boolean canSave() {
 		return false;
 	}

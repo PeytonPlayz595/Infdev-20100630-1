@@ -48,54 +48,46 @@ public class ChunkCache implements IBlockAccess {
 		return this.getLightValueExt(var1, var2, var3, true);
 	}
 
-	public int getLightValueExt(int var1, int var2, int var3, boolean var4) {
-		if(var1 >= -32000000 && var3 >= -32000000 && var1 < 32000000 && var3 <= 32000000) {
-			int var5;
-			int var6;
-			if(var4) {
-				var5 = this.getBlockId(var1, var2, var3);
-				if(var5 == Block.stairSingle.blockID || var5 == Block.tilledField.blockID) {
-					var6 = this.getLightValueExt(var1, var2 + 1, var3, false);
-					int var7 = this.getLightValueExt(var1 + 1, var2, var3, false);
-					int var8 = this.getLightValueExt(var1 - 1, var2, var3, false);
-					int var9 = this.getLightValueExt(var1, var2, var3 + 1, false);
-					int var10 = this.getLightValueExt(var1, var2, var3 - 1, false);
-					if(var7 > var6) {
-						var6 = var7;
-					}
-
-					if(var8 > var6) {
-						var6 = var8;
-					}
-
-					if(var9 > var6) {
-						var6 = var9;
-					}
-
-					if(var10 > var6) {
-						var6 = var10;
-					}
-
-					return var6;
-				}
-			}
-
-			if(var2 < 0) {
-				return 0;
-			} else if(var2 >= 128) {
-				var5 = 15 - this.worldObj.skylightSubtracted;
-				if(var5 < 0) {
-					var5 = 0;
-				}
-
-				return var5;
-			} else {
-				var5 = (var1 >> 4) - this.chunkX;
-				var6 = (var3 >> 4) - this.chunkZ;
-				return this.chunkArray[var5][var6].getBlockLightValue(var1 & 15, var2, var3 & 15, this.worldObj.skylightSubtracted);
-			}
-		} else {
+	public int getLightValueExt(int i, int j, int k, boolean flag) {
+		if (i < 0xfe17b800 || k < 0xfe17b800 || i >= 0x1e84800 || k > 0x1e84800) {
 			return 15;
+		}
+		if (flag) {
+			int l = getBlockId(i, j, k);
+			if (l == Block.stairSingle.blockID || l == Block.tilledField.blockID) {
+				int k1 = getLightValueExt(i, j + 1, k, false);
+				int i2 = getLightValueExt(i + 1, j, k, false);
+				int j2 = getLightValueExt(i - 1, j, k, false);
+				int k2 = getLightValueExt(i, j, k + 1, false);
+				int l2 = getLightValueExt(i, j, k - 1, false);
+				if (i2 > k1) {
+					k1 = i2;
+				}
+				if (j2 > k1) {
+					k1 = j2;
+				}
+				if (k2 > k1) {
+					k1 = k2;
+				}
+				if (l2 > k1) {
+					k1 = l2;
+				}
+				return k1;
+			}
+		}
+		if (j < 0) {
+			return 0;
+		}
+		if (j >= 128) {
+			int i1 = 15 - worldObj.skylightSubtracted;
+			if (i1 < 0) {
+				i1 = 0;
+			}
+			return i1;
+		} else {
+			int j1 = (i >> 4) - chunkX;
+			int l1 = (k >> 4) - chunkZ;
+			return chunkArray[j1][l1].getBlockLightValue(i & 0xf, j, k & 0xf, worldObj.skylightSubtracted);
 		}
 	}
 

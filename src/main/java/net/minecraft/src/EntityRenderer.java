@@ -340,6 +340,13 @@ public class EntityRenderer {
 		double var5 = var2.lastTickPosX + (var2.posX - var2.lastTickPosX) * (double)var1;
 		double var7 = var2.lastTickPosY + (var2.posY - var2.lastTickPosY) * (double)var1;
 		double var9 = var2.lastTickPosZ + (var2.posZ - var2.lastTickPosZ) * (double)var1;
+		IChunkProvider ichunkprovider = mc.theWorld.getChunkProvider();
+		if (ichunkprovider instanceof ChunkProviderLoadOrGenerate) {
+			ChunkProviderLoadOrGenerate chunkproviderloadorgenerate = (ChunkProviderLoadOrGenerate) ichunkprovider;
+			int j = MathHelper.floor_float((int) var5) >> 4;
+			int k = MathHelper.floor_float((int) var7) >> 4;
+			chunkproviderloadorgenerate.func_21110_c(j, k);
+		}
 
 		for(int var11 = 0; var11 < 2; ++var11) {
 			if(this.mc.gameSettings.anaglyph) {

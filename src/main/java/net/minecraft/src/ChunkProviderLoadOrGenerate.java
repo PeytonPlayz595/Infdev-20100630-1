@@ -32,77 +32,72 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
 		}
 	}
 
-	public Chunk provideChunk(int var1, int var2) {
-		if(var1 == this.lastQueriedChunkXPos && var2 == this.lastQueriedChunkZPos && this.lastQueriedChunk != null) {
-			return this.lastQueriedChunk;
-		} else {
-			int var3 = var1 & 31;
-			int var4 = var2 & 31;
-			int var5 = var3 + var4 * 32;
-			if(!this.chunkExists(var1, var2)) {
-				BlockSand.fallInstantly = true;
-				if(this.chunks[var5] != null) {
-					this.chunks[var5].onChunkUnload();
-					this.saveChunk(this.chunks[var5]);
-					this.saveExtraChunkData(this.chunks[var5]);
-				}
-
-				Chunk var6 = this.getChunkAt(var1, var2);
-				if(var6 == null) {
-					if(this.chunkProvider == null) {
-						var6 = this.blankChunk;
-					} else {
-						var6 = this.chunkProvider.provideChunk(var1, var2);
-					}
-				}
-
-				this.chunks[var5] = var6;
-				if(this.chunks[var5] != null) {
-					this.chunks[var5].onChunkLoad();
-				}
-
-				if(!this.chunks[var5].isTerrainPopulated && this.chunkExists(var1 + 1, var2 + 1) && this.chunkExists(var1, var2 + 1) && this.chunkExists(var1 + 1, var2)) {
-					this.populate(this, var1, var2);
-				}
-
-				if(this.chunkExists(var1 - 1, var2) && !this.provideChunk(var1 - 1, var2).isTerrainPopulated && this.chunkExists(var1 - 1, var2 + 1) && this.chunkExists(var1, var2 + 1) && this.chunkExists(var1 - 1, var2)) {
-					this.populate(this, var1 - 1, var2);
-				}
-
-				if(this.chunkExists(var1, var2 - 1) && !this.provideChunk(var1, var2 - 1).isTerrainPopulated && this.chunkExists(var1 + 1, var2 - 1) && this.chunkExists(var1, var2 - 1) && this.chunkExists(var1 + 1, var2)) {
-					this.populate(this, var1, var2 - 1);
-				}
-
-				if(this.chunkExists(var1 - 1, var2 - 1) && !this.provideChunk(var1 - 1, var2 - 1).isTerrainPopulated && this.chunkExists(var1 - 1, var2 - 1) && this.chunkExists(var1, var2 - 1) && this.chunkExists(var1 - 1, var2)) {
-					this.populate(this, var1 - 1, var2 - 1);
-				}
-
-				BlockSand.fallInstantly = false;
-			}
-
-			this.lastQueriedChunkXPos = var1;
-			this.lastQueriedChunkZPos = var2;
-			this.lastQueriedChunk = this.chunks[var5];
-			return this.chunks[var5];
+	public Chunk provideChunk(int i, int j) {
+		if (i == lastQueriedChunkXPos && j == lastQueriedChunkZPos && lastQueriedChunk != null) {
+			return lastQueriedChunk;
 		}
+		if (!worldObj.field_9430_x && !func_21111_d(i, j)) {
+			return blankChunk;
+		}
+		int k = i & 0x1f;
+		int l = j & 0x1f;
+		int i1 = k + l * 32;
+		if (!chunkExists(i, j)) {
+			if (chunks[i1] != null) {
+				chunks[i1].onChunkUnload();
+				//saveChunk(chunks[i1]);
+				//saveExtraChunkData(chunks[i1]);
+			}
+			Chunk chunk = getChunkAt(i, j);
+			if (chunk == null) {
+				if (chunkProvider == null) {
+					chunk = blankChunk;
+				} else {
+					chunk = chunkProvider.provideChunk(i, j);
+				}
+			}
+			chunks[i1] = chunk;
+			chunk.doNothing();
+			if (chunks[i1] != null) {
+				chunks[i1].onChunkLoad();
+			}
+			if (!chunks[i1].isTerrainPopulated && chunkExists(i + 1, j + 1) && chunkExists(i, j + 1)
+					&& chunkExists(i + 1, j)) {
+				populate(this, i, j);
+			}
+			if (chunkExists(i - 1, j) && !provideChunk(i - 1, j).isTerrainPopulated && chunkExists(i - 1, j + 1)
+					&& chunkExists(i, j + 1) && chunkExists(i - 1, j)) {
+				populate(this, i - 1, j);
+			}
+			if (chunkExists(i, j - 1) && !provideChunk(i, j - 1).isTerrainPopulated && chunkExists(i + 1, j - 1)
+					&& chunkExists(i, j - 1) && chunkExists(i + 1, j)) {
+				populate(this, i, j - 1);
+			}
+			if (chunkExists(i - 1, j - 1) && !provideChunk(i - 1, j - 1).isTerrainPopulated && chunkExists(i - 1, j - 1)
+					&& chunkExists(i, j - 1) && chunkExists(i - 1, j)) {
+				populate(this, i - 1, j - 1);
+			}
+		}
+		lastQueriedChunkXPos = i;
+		lastQueriedChunkZPos = j;
+		lastQueriedChunk = chunks[i1];
+		return chunks[i1];
 	}
 
 	private Chunk getChunkAt(int var1, int var2) {
-		if(this.chunkLoader == null) {
+		if (chunkLoader == null) {
 			return null;
-		} else {
-			try {
-				Chunk var3 = this.chunkLoader.loadChunk(this.worldObj, var1, var2);
-				if(var3 != null) {
-					var3.lastSaveTime = this.worldObj.worldTime;
-				}
-
-				return var3;
-			} catch (Exception var4) {
-				var4.printStackTrace();
-				return null;
-			}
 		}
+		try {
+			Chunk chunk = chunkLoader.loadChunk(worldObj, var1, var2);
+			if (chunk != null) {
+				chunk.lastSaveTime = worldObj.worldTime;
+			}
+			return chunk;
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
+		return blankChunk;
 	}
 
 	private void saveExtraChunkData(Chunk var1) {
@@ -140,53 +135,58 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
 
 	}
 
-	public boolean saveChunks(boolean var1, IProgressUpdate var2) {
-		int var3 = 0;
-		int var4 = 0;
-		int var5;
-		if(var2 != null) {
-			for(var5 = 0; var5 < this.chunks.length; ++var5) {
-				if(this.chunks[var5] != null && this.chunks[var5].needsSaving(var1)) {
-					++var4;
+	public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
+		int i = 0;
+		int j = 0;
+		if (iprogressupdate != null) {
+			for (int k = 0; k < chunks.length; k++) {
+				if (chunks[k] != null && chunks[k].needsSaving(flag)) {
+					j++;
 				}
+			}
+
+		}
+		int l = 0;
+		for (int i1 = 0; i1 < chunks.length; i1++) {
+			if (chunks[i1] == null) {
+				continue;
+			}
+			if (flag && !chunks[i1].neverSave) {
+				saveExtraChunkData(chunks[i1]);
+			}
+			if (!chunks[i1].needsSaving(flag)) {
+				continue;
+			}
+			saveChunk(chunks[i1]);
+			chunks[i1].isModified = false;
+			if (++i == 2 && !flag) {
+				return false;
+			}
+			if (iprogressupdate != null && ++l % 10 == 0) {
+				iprogressupdate.setLoadingProgress((l * 100) / j);
 			}
 		}
 
-		var5 = 0;
-
-		for(int var6 = 0; var6 < this.chunks.length; ++var6) {
-			if(this.chunks[var6] != null) {
-				if(var1 && !this.chunks[var6].neverSave) {
-					this.saveExtraChunkData(this.chunks[var6]);
-				}
-
-				if(this.chunks[var6].needsSaving(var1)) {
-					this.saveChunk(this.chunks[var6]);
-					this.chunks[var6].isModified = false;
-					++var3;
-					if(var3 == 2 && !var1) {
-						return false;
-					}
-
-					if(var2 != null) {
-						++var5;
-						if(var5 % 10 == 0) {
-							var2.setLoadingProgress(var5 * 100 / var4);
-						}
-					}
-				}
-			}
-		}
-
-		if(var1) {
-			if(this.chunkLoader == null) {
+		if (flag) {
+			if (chunkLoader == null) {
 				return true;
 			}
-
-			this.chunkLoader.saveExtraData();
+			chunkLoader.saveExtraData();
 		}
-
 		return true;
+	}
+	
+	private int field_21113_i;
+	private int field_21112_j;
+	
+	public void func_21110_c(int i, int j) {
+		field_21113_i = i;
+		field_21112_j = j;
+	}
+	
+	public boolean func_21111_d(int i, int j) {
+		byte byte0 = 15;
+		return i >= field_21113_i - byte0 && j >= field_21112_j - byte0 && i <= field_21113_i + byte0 && j <= field_21112_j + byte0;
 	}
 
 	public boolean canSave() {

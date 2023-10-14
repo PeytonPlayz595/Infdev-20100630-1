@@ -17,21 +17,28 @@ public class ChunkLoader implements IChunkLoader {
 	public ChunkLoader(String dir) {
 		saveDir = dir;
 	}
-	
-	public static final String CHUNK_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	private String chunkFileForXZ(int x, int z) {
 		int unsignedX = x + 30233088;
 		int unsignedZ = z + 30233088;
-		int radix = CHUNK_CHARS.length();
 		StringBuilder path = new StringBuilder(10);
 		for(int i = 0; i < 5; ++i) {
-			path.append(CHUNK_CHARS.charAt(unsignedX % radix));
-			unsignedX /= radix;
-			path.append(CHUNK_CHARS.charAt(unsignedZ % radix));
-			unsignedZ /= radix;
+			int remainderX = unsignedX % 36;
+			int remainderZ = unsignedZ % 36;
+			path.append(getChar(remainderX));
+			path.append(getChar(remainderZ));
+			unsignedX /= 36;
+			unsignedZ /= 36;
 		}
 		return path.toString();
+	}
+	
+	private char getChar(int num) {
+		if(num < 10) {
+			return (char) ('0' + num);
+		} else {
+			return (char) ('A' + num - 10);
+		}
 	}
 
 	public Chunk loadChunk(World var1, int x, int z) {
