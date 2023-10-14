@@ -189,14 +189,6 @@ public class ChunkProviderLoadOrGenerate implements IChunkProvider {
 		return true;
 	}
 
-	public boolean unload100OldestChunks() {
-		if(this.chunkLoader != null) {
-			this.chunkLoader.chunkTick();
-		}
-
-		return this.chunkProvider.unload100OldestChunks();
-	}
-
 	public boolean canSave() {
 		return true;
 	}

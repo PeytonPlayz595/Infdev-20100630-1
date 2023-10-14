@@ -48,6 +48,8 @@ public class World implements IBlockAccess {
 	public final String levelName;
 	private ArrayList collidingBoundingBoxes;
 	private List entitiesWithinAABBExcludingEntity;
+	static int lightUpdates = 0;
+	private int lightUpdated;
 
 	public static NBTTagCompound getLevelData(String var1) {
 		byte[] data = LWJGLMain.readFile(var1 + "/level.dat");
@@ -67,10 +69,8 @@ public class World implements IBlockAccess {
 	}
 	
 	public static void deleteWorld(String var1) {
-		String dir = "saves/" + var1;
-		if(LWJGLMain.directoryExists(dir)) {
-			FileSystemUtils.recursiveDeleteDirectory(dir);
-		}
+		String dir = var1 + "/";
+		FileSystemUtils.recursiveDeleteDirectoryWithProgress(dir, "Deleting World!", "Please Wait...", Minecraft.getMinecraft().loadingScreen);
 	}
 
 	public World(String var2) {
@@ -78,6 +78,7 @@ public class World implements IBlockAccess {
 	}
 
 	public World(String var2, long var3) {
+		lightUpdated = 0;
 		this.lightingToUpdate = new ArrayList();
 		this.loadedEntityList = new ArrayList();
 		this.unloadedEntityList = new ArrayList();
@@ -532,12 +533,9 @@ public class World implements IBlockAccess {
 				}
 			}
 
-			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-				if(this.getSavedLightValue(var1, var2, var3, var4) != var5) {
-					this.scheduleLightingUpdate(var1, var2, var3, var4, var2, var3, var4);
-				}
+			if(this.getSavedLightValue(var1, var2, var3, var4) != var5) {
+				this.scheduleLightingUpdate(var1, var2, var3, var4, var2, var3, var4);
 			}
-
 		}
 	}
 
@@ -1318,43 +1316,66 @@ public class World implements IBlockAccess {
 	public void saveWorldIndirectly(IProgressUpdate var1) {
 		this.saveWorld(true, var1);
 	}
-
+	
 	public boolean updatingLighting() {
-		int var1 = 100000;
-
-		while(this.lightingToUpdate.size() > 0) {
-			--var1;
-			if(var1 <= 0) {
-				return true;
+		if (lightUpdated >= 50) {
+			return false;
+		}
+		lightUpdated++;
+		try {
+			int i = 500;
+			for (; lightingToUpdate.size() > 0; ((MetadataChunkBlock) lightingToUpdate.remove(lightingToUpdate.size() - 1)).updateLight(this)) {
+				if (--i <= 0) {
+					boolean flag = true;
+					return flag;
+				}
 			}
 
-			((MetadataChunkBlock)this.lightingToUpdate.remove(this.lightingToUpdate.size() - 1)).updateLight(this);
+			boolean flag1 = false;
+			return flag1;
+		} finally {
+			lightUpdated--;
 		}
-
-		return false;
 	}
 
 	public void scheduleLightingUpdate(EnumSkyBlock var1, int var2, int var3, int var4, int var5, int var6, int var7) {
-		int var8 = this.lightingToUpdate.size();
-		int var9 = 4;
-		if(var9 > var8) {
-			var9 = var8;
+		scheduleLightingUpdate(var1, var2, var3, var4, var5, var6, var7, true);
+	}
+	
+	public void scheduleLightingUpdate(EnumSkyBlock enumskyblock, int i, int j, int k, int l, int i1, int j1, boolean flag) {
+		lightUpdates++;
+		if (lightUpdates == 50) {
+			lightUpdates--;
+			return;
 		}
-
-		for(int var10 = 0; var10 < var9; ++var10) {
-			MetadataChunkBlock var11 = (MetadataChunkBlock)this.lightingToUpdate.get(this.lightingToUpdate.size() - var10 - 1);
-			if(var11.skyBlock == var1 && var11.getLightUpdated(var2, var3, var4, var5, var6, var7)) {
-				return;
+		int k1 = (l + i) / 2;
+		int l1 = (j1 + k) / 2;
+		if (!blockExists(k1, 64, l1)) {
+			lightUpdates--;
+			return;
+		}
+		int i2 = lightingToUpdate.size();
+		if (flag) {
+			int j2 = 5;
+			if (j2 > i2) {
+				j2 = i2;
 			}
-		}
-
-		this.lightingToUpdate.add(new MetadataChunkBlock(var1, var2, var3, var4, var5, var6, var7));
-		if(this.lightingToUpdate.size() > 100000) {
-			while(this.lightingToUpdate.size() > '\uc350') {
-				this.updatingLighting();
+			for (int l2 = 0; l2 < j2; l2++) {
+				MetadataChunkBlock metadatachunkblock = (MetadataChunkBlock) lightingToUpdate.get(lightingToUpdate.size() - l2 - 1);
+				if (metadatachunkblock.skyBlock == enumskyblock && metadatachunkblock.getLightUpdated(i, j, k, l, i1, j1)) {
+					lightUpdates--;
+					return;
+				}
 			}
-		}
 
+		}
+		lightingToUpdate.add(new MetadataChunkBlock(enumskyblock, i, j, k, l, i1, j1));
+		int k2 = 0xf4240;
+		if (lightingToUpdate.size() > 0xf4240) {
+			System.out.println((new StringBuilder()).append("More than ").append(k2).append(" updates, aborting lighting updates").toString());
+			lightingToUpdate.clear();
+		}
+		lightUpdates--;
 	}
 
 	public void calculateInitialSkylight() {
@@ -1366,7 +1387,6 @@ public class World implements IBlockAccess {
 	}
 
 	public void tick() {
-		this.chunkProvider.unload100OldestChunks();
 		if(!this.loadedEntityList.contains(this.playerEntity) && this.playerEntity != null) {
 			System.out.println("DOHASDOSHIH!");
 			this.spawnEntityInWorld(this.playerEntity);
@@ -1530,12 +1550,6 @@ public class World implements IBlockAccess {
 		this.unloadedEntityList.addAll(var1);
 	}
 
-	public void dropOldChunks() {
-		while(this.chunkProvider.unload100OldestChunks()) {
-		}
-
-	}
-
 	public boolean canBlockBePlacedAt(int var1, int var2, int var3, int var4, boolean var5) {
 		int var6 = this.getBlockId(var2, var3, var4);
 		Block var7 = Block.blocksList[var6];
@@ -1576,6 +1590,10 @@ public class World implements IBlockAccess {
 		int var15 = var8 + var9;
 		ChunkCache var16 = new ChunkCache(this, var10, var11, var12, var13, var14, var15);
 		return (new Pathfinder(var16)).createEntityPathTo(var1, var2, var3, var4, var5);
+	}
+	
+	public boolean doChunksNearChunkExist(int i, int j, int k, int l) {
+		return checkChunksExist(i - l, j - l, k - l, i + l, j + l, k + l);
 	}
 
 	static {

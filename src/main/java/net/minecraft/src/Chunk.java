@@ -63,51 +63,42 @@ public class Chunk {
 
 	public void doNothing() {
 	}
-
-	public void generateHeightMap() {
-		int var1 = 127;
-
-		int var2;
-		int var3;
-		for(var2 = 0; var2 < 16; ++var2) {
-			for(var3 = 0; var3 < 16; ++var3) {
-				this.heightMap[var3 << 4 | var2] = -128;
-				this.relightBlock(var2, 127, var3);
-				if((this.heightMap[var3 << 4 | var2] & 255) < var1) {
-					var1 = this.heightMap[var3 << 4 | var2] & 255;
-				}
-			}
-		}
-
-		this.height = var1;
-
-		for(var2 = 0; var2 < 16; ++var2) {
-			for(var3 = 0; var3 < 16; ++var3) {
-				this.updateSkylight_do(var2, var3);
-			}
-		}
-
-		this.isModified = true;
+	
+	private void func_996_c(int i, int j) {
+		int k = getHeightValue(i, j);
+		int l = xPosition * 16 + i;
+		int i1 = zPosition * 16 + j;
+		checkSkylightNeighborHeight(l - 1, i1, k);
+		checkSkylightNeighborHeight(l + 1, i1, k);
+		checkSkylightNeighborHeight(l, i1 - 1, k);
+		checkSkylightNeighborHeight(l, i1 + 1, k);
 	}
 
-	private void updateSkylight_do(int var1, int var2) {
-		int var3 = this.getHeightValue(var1, var2);
-		int var4 = this.xPosition * 16 + var1;
-		int var5 = this.zPosition * 16 + var2;
-		this.checkSkylightNeighborHeight(var4 - 1, var5, var3);
-		this.checkSkylightNeighborHeight(var4 + 1, var5, var3);
-		this.checkSkylightNeighborHeight(var4, var5 - 1, var3);
-		this.checkSkylightNeighborHeight(var4, var5 + 1, var3);
+	public void generateHeightMap() {
+		int i = 127;
+		for (int j = 0; j < 16; j++) {
+			for (int k = 0; k < 16; k++) {
+				int l = 127;
+				for (int i1 = j << 11 | k << 7; l > 0 && Block.lightOpacity[blocks[(i1 + l) - 1]] == 0; l--) {
+				}
+				heightMap[k << 4 | j] = (byte) l;
+				if (l < i) {
+					i = l;
+				}
+			}
+
+		}
+
+		height = i;
+		isModified = true;
 	}
 
 	private void checkSkylightNeighborHeight(int var1, int var2, int var3) {
-		if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-			int var4 = this.worldObj.getHeightValue(var1, var2);
-			if(var4 > var3) {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var3, var2, var1, var4, var2);
-			} else if(var4 < var3) {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var4, var2, var1, var3, var2);
-			}
+		int var4 = this.worldObj.getHeightValue(var1, var2);
+		if(var4 > var3) {
+			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var3, var2, var1, var4, var2);
+		} else if(var4 < var3) {
+			this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var1, var4, var2, var1, var3, var2);
 		}
 
 		this.isModified = true;
@@ -153,9 +144,7 @@ public class Chunk {
 					this.skylightMap.set(var1, var8, var3, 15);
 				}
 			} else {
-				if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-					this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6, var4, var7, var6, var5, var7);
-				}
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6, var4, var7, var6, var5, var7);
 
 				for(var8 = var4; var8 < var5; ++var8) {
 					this.skylightMap.set(var1, var8, var3, 0);
@@ -183,9 +172,7 @@ public class Chunk {
 			}
 
 			if(var5 != var9) {
-				if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-					this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6 - 1, var5, var7 - 1, var6 + 1, var9, var7 + 1);
-				}
+				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var6 - 1, var5, var7 - 1, var6 + 1, var9, var7 + 1);
 			}
 
 			this.isModified = true;
@@ -196,78 +183,67 @@ public class Chunk {
 		return this.blocks[var1 << 11 | var3 << 7 | var2];
 	}
 
-	public boolean setBlockIDWithMetadata(int var1, int var2, int var3, int var4, int var5) {
-		byte var6 = (byte)var4;
-		int var7 = this.heightMap[var3 << 4 | var1] & 255;
-		int var8 = this.blocks[var1 << 11 | var3 << 7 | var2] & 255;
-		if(var8 == var4) {
+	public boolean setBlockIDWithMetadata(int i, int j, int k, int l, int i1) {
+		byte byte0 = (byte) l;
+		int j1 = heightMap[k << 4 | i] & 0xff;
+		int k1 = blocks[i << 11 | k << 7 | j] & 0xff;
+		if (k1 == l && data.get(i, j, k) == i1) {
 			return false;
-		} else {
-			int var9 = this.xPosition * 16 + var1;
-			int var10 = this.zPosition * 16 + var3;
-			this.blocks[var1 << 11 | var3 << 7 | var2] = var6;
-			if(var8 != 0) {
-				Block.blocksList[var8].onBlockRemoval(this.worldObj, var9, var2, var10);
-			}
-
-			this.data.set(var1, var2, var3, var5);
-			if(Block.lightOpacity[var6] != 0) {
-				if(var2 >= var7) {
-					this.relightBlock(var1, var2 + 1, var3);
-				}
-			} else if(var2 == var7 - 1) {
-				this.relightBlock(var1, var2, var3);
-			}
-
-			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var9, var2, var10, var9, var2, var10);
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var9, var2, var10, var9, var2, var10);
-			}
-			this.updateSkylight_do(var1, var3);
-			if(var4 != 0) {
-				Block.blocksList[var4].onBlockAdded(this.worldObj, var9, var2, var10);
-			}
-
-			this.isModified = true;
-			return true;
 		}
+		int l1 = xPosition * 16 + i;
+		int i2 = zPosition * 16 + k;
+		blocks[i << 11 | k << 7 | j] = byte0;
+		if (k1 != 0) {
+			Block.blocksList[k1].onBlockRemoval(worldObj, l1, j, i2);
+		}
+		data.set(i, j, k, i1);
+		if (Block.lightOpacity[byte0] != 0) {
+			if (j >= j1) {
+				relightBlock(i, j + 1, k);
+			}
+		} else if (j == j1 - 1) {
+			relightBlock(i, j, k);
+		}
+		worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, l1, j, i2, l1, j, i2);
+		worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, l1, j, i2, l1, j, i2);
+		func_996_c(i, k);
+		data.set(i, j, k, i1);
+		if (l != 0) {
+			Block.blocksList[l].onBlockAdded(worldObj, l1, j, i2);
+		}
+		isModified = true;
+		return true;
 	}
 
-	public boolean setBlockID(int var1, int var2, int var3, int var4) {
-		byte var5 = (byte)var4;
-		int var6 = this.heightMap[var3 << 4 | var1] & 255;
-		int var7 = this.blocks[var1 << 11 | var3 << 7 | var2] & 255;
-		if(var7 == var4) {
+	public boolean setBlockID(int i, int j, int k, int l) {
+		byte byte0 = (byte) l;
+		int i1 = heightMap[k << 4 | i] & 0xff;
+		int j1 = blocks[i << 11 | k << 7 | j] & 0xff;
+		if (j1 == l) {
 			return false;
-		} else {
-			int var8 = this.xPosition * 16 + var1;
-			int var9 = this.zPosition * 16 + var3;
-			this.blocks[var1 << 11 | var3 << 7 | var2] = var5;
-			if(var7 != 0) {
-				Block.blocksList[var7].onBlockRemoval(this.worldObj, var8, var2, var9);
-			}
-
-			this.data.set(var1, var2, var3, 0);
-			if(Block.lightOpacity[var5] != 0) {
-				if(var2 >= var6) {
-					this.relightBlock(var1, var2 + 1, var3);
-				}
-			} else if(var2 == var6 - 1) {
-				this.relightBlock(var1, var2, var3);
-			}
-
-			if(!Minecraft.getMinecraft().gameSettings.highPerformance) {
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, var8, var2, var9, var8, var2, var9);
-				this.worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, var8, var2, var9, var8, var2, var9);
-			}
-			this.updateSkylight_do(var1, var3);
-			if(var4 != 0) {
-				Block.blocksList[var4].onBlockAdded(this.worldObj, var8, var2, var9);
-			}
-
-			this.isModified = true;
-			return true;
 		}
+		int k1 = xPosition * 16 + i;
+		int l1 = zPosition * 16 + k;
+		blocks[i << 11 | k << 7 | j] = byte0;
+		if (j1 != 0) {
+			Block.blocksList[j1].onBlockRemoval(worldObj, k1, j, l1);
+		}
+		data.set(i, j, k, 0);
+		if (Block.lightOpacity[byte0] != 0) {
+			if (j >= i1) {
+				relightBlock(i, j + 1, k);
+			}
+		} else if (j == i1 - 1) {
+			relightBlock(i, j, k);
+		}
+		worldObj.scheduleLightingUpdate(EnumSkyBlock.Sky, k1, j, l1, k1, j, l1);
+		worldObj.scheduleLightingUpdate(EnumSkyBlock.Block, k1, j, l1, k1, j, l1);
+		func_996_c(i, k);
+		if (l != 0) {
+			Block.blocksList[l].onBlockAdded(worldObj, k1, j, l1);
+		}
+		isModified = true;
+		return true;
 	}
 
 	public int getBlockMetadata(int var1, int var2, int var3) {

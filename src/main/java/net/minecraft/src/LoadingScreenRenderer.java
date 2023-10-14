@@ -56,6 +56,23 @@ public class LoadingScreenRenderer implements IProgressUpdate {
 			this.systemTime = 0L;
 		}
 	}
+	
+	public void displayLoadingString(String s, String s1) {
+		if (!mc.running) {
+			if (printText) {
+				return;
+			} else {
+				throw new MinecraftError();
+			}
+		} else {
+			systemTime = 0L;
+			currentlyDisplayedProgress = s1;
+			currentlyDisplayedText = s;
+			setLoadingProgress(-1);
+			systemTime = 0L;
+			return;
+		}
+	}
 
 	public void setLoadingProgress(int var1) {
 		if(!this.mc.running) {
