@@ -18,73 +18,64 @@ public class ChunkLoader implements IChunkLoader {
 		saveDir = dir;
 	}
 
-	private String chunkFileForXZ(int x, int z) {
-		int unsignedX = x + 30233088;
-		int unsignedZ = z + 30233088;
-		StringBuilder path = new StringBuilder(10);
-		for(int i = 0; i < 5; ++i) {
-			int remainderX = unsignedX % 36;
-			int remainderZ = unsignedZ % 36;
-			path.append(getChar(remainderX));
-			path.append(getChar(remainderZ));
-			unsignedX /= 36;
-			unsignedZ /= 36;
-		}
-		return path.toString();
-	}
-	
-	private char getChar(int num) {
-		if(num < 10) {
-			return (char) ('0' + num);
-		} else {
-			return (char) ('A' + num - 10);
-		}
+	private static final char[] CHUNK_CHARS_LOOKUP = {
+    	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+	};
+
+	public static String chunkFileForXZ(int x, int z) {
+ 		int unsignedX = x + 30233088;
+    	int unsignedZ = z + 30233088;
+    	int radix = CHUNK_CHARS_LOOKUP.length;
+    	char[] path = new char[10];
+    	for (int i = 0; i < 5; ++i) {
+        	path[i * 2] = CHUNK_CHARS_LOOKUP[unsignedX % radix];
+        	unsignedX /= radix;
+        	path[i * 2 + 1] = CHUNK_CHARS_LOOKUP[unsignedZ % radix];
+        	unsignedZ /= radix;
+    	}
+    	return new String(path);
 	}
 
 	public Chunk loadChunk(World var1, int x, int z) {
-		String name = chunkFileForXZ(x, z);
-		String path = saveDir + "/" + name;
-		byte[] dat = LWJGLMain.readFile(path);
-		if(dat != null) {
-			try {
-				NBTTagCompound nbt = (NBTTagCompound) NBTBase.readNamedTag(new DataInputStream(new ByteArrayInputStream(dat)));
-				int xx = nbt.getInteger("xPos");
-				int zz = nbt.getInteger("zPos");
-				if(x != xx || z != zz) {
-					String name2 = chunkFileForXZ(xx, zz);
-					System.err.println("The chunk file '" + name + "' was supposed to be at [" + x + ", " + z + "], but the file contained a chunk from [" + xx + ", " + zz +
-							"]. It's data will be moved to file '" + name2 + "', and a new empty chunk will be created for file '" + name + "' for [" + x + ", " + z + "]");
-					LWJGLMain.renameFile(path, saveDir + "/" + name2);
-					return null;
-				}
-				
-				return loadChunkIntoWorldFromCompound(var1, nbt);
-			} catch (IOException e) {
-				System.err.println("Corrupt chunk '" + name + "' was found at: [" + x + ", " + z + "]");
-				System.err.println("The file will be deleted");
-				LWJGLMain.deleteFile(path);
-				e.printStackTrace();
-				return null;
-			}
-		}else {
-			return null;
-		}
+    	String name = chunkFileForXZ(x, z);
+    	String path = saveDir + "/" + name;
+    	byte[] dat = LWJGLMain.readFile(path);
+    	if (dat != null) {
+        	try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(dat))) {
+            	NBTTagCompound nbt = (NBTTagCompound) NBTBase.readNamedTag(dis);
+            	int xx = nbt.getInteger("xPos");
+            	int zz = nbt.getInteger("zPos");
+            	if (x != xx || z != zz) {
+                	String name2 = chunkFileForXZ(xx, zz);
+                	System.err.println("The chunk file '" + name + "' was supposed to be at [" + x + ", " + z + "], but the file contained a chunk from [" + xx + ", " + zz + "]. It's data will be moved to file '" + name2 + "', and a new empty chunk will be created for file '" + name + "' for [" + x + ", " + z + "]");
+                	LWJGLMain.renameFile(path, saveDir + "/" + name2);
+                	return null;
+            	}
+            	return loadChunkIntoWorldFromCompound(var1, nbt);
+        	} catch (IOException e) {
+            	System.err.println("Corrupt chunk '" + name + "' was found at: [" + x + ", " + z + "]");
+            	System.err.println("The file will be deleted");
+            	LWJGLMain.deleteFile(path);
+            	e.printStackTrace();
+            	return null;
+        	}
+    	} else {
+        	return null;
+    	}
 	}
 
 	public void saveChunk(World var1, Chunk var2) {
-		NBTTagCompound toSave = new NBTTagCompound();
-		storeChunkInCompound(var2, var1, toSave);
-		ByteArrayOutputStream bao = new ByteArrayOutputStream(98304);
-		try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(bao))) {
-			NBTBase.writeNamedTag(toSave, dos);
-			dos.flush();
-			byte[] data = bao.toByteArray();
-			LWJGLMain.writeFile(saveDir + "/" + chunkFileForXZ(var2.xPosition, var2.zPosition), data);
-		} catch (IOException e) {
-			System.err.println("Failed to serialize chunk at [" + var2.xPosition + ", " + var2.zPosition + "] to byte array");
+    	NBTTagCompound toSave = new NBTTagCompound();
+    	storeChunkInCompound(var2, var1, toSave);
+    	try (ByteArrayOutputStream bao = new ByteArrayOutputStream(131072);
+        	DataOutputStream dos = new DataOutputStream(bao)) {
+        	NBTBase.writeNamedTag(toSave, dos);
+        	LWJGLMain.writeFile(saveDir + "/" + chunkFileForXZ(var2.xPosition, var2.zPosition), bao.toByteArray());
+    	} catch (IOException e) {
+        	System.err.println("Failed to serialize chunk at [" + var2.xPosition + ", " + var2.zPosition + "] to byte array");
 			e.printStackTrace();
 			return;
-		}
+    	}
 	}
 
 	public void storeChunkInCompound(Chunk var1, World var2, NBTTagCompound var3) {

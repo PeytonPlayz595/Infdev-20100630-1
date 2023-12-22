@@ -478,8 +478,8 @@ public class Minecraft implements Runnable {
 
 	public void runTick() {
 		this.ingameGUI.updateTick();
-		
-		if (thePlayer != null) {
+
+		if (thePlayer != null && theWorld != null) {
 			IChunkProvider ichunkprovider = theWorld.getChunkProvider();
 			if (ichunkprovider instanceof ChunkProviderLoadOrGenerate) {
 				ChunkProviderLoadOrGenerate chunkproviderloadorgenerate = (ChunkProviderLoadOrGenerate) ichunkprovider;
