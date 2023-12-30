@@ -29,6 +29,7 @@ Cons:
 - EXTREMELY laggy
 - It's pirated
 - Has bugs & some features may have to be removed for performance issues
+- No multiplayer, so be alone.
 
 <br>
 
