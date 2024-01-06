@@ -9,5 +9,7 @@ public interface IChunkLoader {
 
 	void saveExtraChunkData(World var1, Chunk var2);
 
+	void chunkTick();
+
 	void saveExtraData();
 }

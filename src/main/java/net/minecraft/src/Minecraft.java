@@ -207,7 +207,9 @@ public class Minecraft implements Runnable {
 
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			if(this.theWorld != null) {
-				while(this.theWorld.updatingLighting()) {
+				if(!this.gameSettings.highPerformance) {
+					while(this.theWorld.updatingLighting()) {
+					}
 				}
 			}
 
@@ -616,7 +618,7 @@ public class Minecraft implements Runnable {
 				this.entityRenderer.updateRenderer();
 			}
 
-			if(!this.isGamePaused) {
+			if(!this.isGamePaused && !this.gameSettings.highPerformance) {
 				this.renderGlobal.updateClouds();
 			}
 
@@ -742,6 +744,7 @@ public class Minecraft implements Runnable {
 			this.theWorld.tickUpdates(true);
 		}
 
+		this.theWorld.dropOldChunks();
 		BlockSand.fallInstantly = false;
 	}
 

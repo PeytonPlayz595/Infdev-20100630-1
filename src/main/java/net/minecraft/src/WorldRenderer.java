@@ -31,23 +31,32 @@ public class WorldRenderer {
 	public boolean needsUpdate;
 	public AxisAlignedBB rendererBoundingBox;
 	public int chunkIndex;
-	public boolean isVisible = true;
+	public int isVisible;
+	public boolean isNowVisible;
 	public boolean isWaitingOnOcclusionQuery;
 	public int glOcclusionQuery;
 	public boolean isChunkLit;
 	private boolean isInitialized = false;
 	public List tileEntityRenderers = new ArrayList();
 	private List tileEntities;
+	public int chunkX;
+	public int chunkY;
+	public int chunkZ;
 
 	public WorldRenderer(World var1, List var2, int var3, int var4, int var5, int var6, int var7) {
-		this.worldObj = var1;
-		this.tileEntities = var2;
-		this.sizeWidth = this.sizeHeight = this.sizeDepth = var6;
-		this.rendererRadius = MathHelper.sqrt_float((float)(this.sizeWidth * this.sizeWidth + this.sizeHeight * this.sizeHeight + this.sizeDepth * this.sizeDepth)) / 2.0F;
-		this.glRenderList = var7;
-		this.posX = -999;
-		this.setPosition(var3, var4, var5);
-		this.needsUpdate = false;
+		glRenderList = -1;
+		isInFrustum = false;
+		skipRenderPass = new boolean[2];
+		isVisible = 0;
+		isNowVisible = true;
+		isInitialized = false;
+		tileEntityRenderers = new ArrayList();
+		worldObj = var1;
+		tileEntities = var2;
+		sizeWidth = sizeHeight = sizeDepth = var6;
+		glRenderList = var7;
+		posX = -999;
+		needsUpdate = false;
 	}
 
 	public void setPosition(int var1, int var2, int var3) {
@@ -56,6 +65,9 @@ public class WorldRenderer {
 			this.posX = var1;
 			this.posY = var2;
 			this.posZ = var3;
+			chunkX = var1 >> 4;
+			chunkY = var2 >> 4;
+			chunkZ = var3 >> 4;
 			this.posXPlus = var1 + this.sizeWidth / 2;
 			this.posYPlus = var2 + this.sizeHeight / 2;
 			this.posZPlus = var3 + this.sizeDepth / 2;
@@ -68,7 +80,7 @@ public class WorldRenderer {
 			float var4 = 2.0F;
 			this.rendererBoundingBox = AxisAlignedBB.getBoundingBox((double)((float)var1 - var4), (double)((float)var2 - var4), (double)((float)var3 - var4), (double)((float)(var1 + this.sizeWidth) + var4), (double)((float)(var2 + this.sizeHeight) + var4), (double)((float)(var3 + this.sizeDepth) + var4));
 			GL11.glNewList(this.glRenderList + 2, GL11.GL_COMPILE);
-			RenderItem.renderAABB(AxisAlignedBB.getBoundingBoxFromPool((double)((float)this.posXClip - var4), (double)((float)this.posYClip - var4), (double)((float)this.posZClip - var4), (double)((float)(this.posXClip + this.sizeWidth) + var4), (double)((float)(this.posYClip + this.sizeHeight) + var4), (double)((float)(this.posZClip + this.sizeDepth) + var4)));
+			//RenderItem.renderAABB(AxisAlignedBB.getBoundingBoxFromPool((double)((float)this.posXClip - var4), (double)((float)this.posYClip - var4), (double)((float)this.posZClip - var4), (double)((float)(this.posXClip + this.sizeWidth) + var4), (double)((float)(this.posYClip + this.sizeHeight) + var4), (double)((float)(this.posZClip + this.sizeDepth) + var4)));
 			GL11.glEndList();
 			this.markDirty();
 		}

@@ -173,6 +173,9 @@ public class ChunkLoader implements IChunkLoader {
 		return var4;
 	}
 
+	public void chunkTick() {
+	}
+
 	public void saveExtraData() {
 	}
 
