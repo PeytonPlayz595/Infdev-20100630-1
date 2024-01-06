@@ -4,9 +4,7 @@ This project aims to be a 1:1 replica of Minecraft Infdev 20100630-1 ported to t
 ## STILL IN TESTING!
 THIS PROJECT IS STILL IN TESTING, IT WILL CONTAIN BUGS AND GLITCHES SO DON'T GET TOO ATTACHED TO YOUR WORLDS!
 
-GAME IS EXTREMELY LAGGY... 
-
-DO NOT MAKE ISSUES ABOUT THE LAG, WE HAVE ALREADY WARNED YOU
+GAME IS EXTREMELY LAGGY...
 
 ## Contributing
 Feel free to contribute, just open a pull request and DM on Discord (peytonplayz585) because I probably won't check pull requests that often.
@@ -29,7 +27,6 @@ Cons:
 - EXTREMELY laggy
 - It's pirated
 - Has bugs & some features may have to be removed for performance issues
-- No multiplayer, so be alone.
 
 <br>
 
