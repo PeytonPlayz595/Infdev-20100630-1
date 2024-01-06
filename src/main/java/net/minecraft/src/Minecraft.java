@@ -59,7 +59,7 @@ public class Minecraft implements Runnable {
 
 	public void startGame() {
 		this.gameSettings = new GameSettings(this);
-		this.renderEngine = new RenderEngine(this.gameSettings);
+		this.renderEngine = new RenderEngine();
 		this.fontRenderer = new FontRenderer(this.gameSettings, "/default.png", this.renderEngine);
 		this.loadScreen();
 		this.mouseHelper = new MouseHelper();
