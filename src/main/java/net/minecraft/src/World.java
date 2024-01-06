@@ -50,7 +50,6 @@ public class World implements IBlockAccess {
 	private List entitiesWithinAABBExcludingEntity;
 	static int lightUpdates = 0;
 	private int lightUpdated;
-	public boolean field_9430_x;
 
 	public static NBTTagCompound getLevelData(String var1) {
 		byte[] data = LWJGLMain.readFile(var1 + "/level.dat");
@@ -130,21 +129,15 @@ public class World implements IBlockAccess {
 
 		this.chunkProvider = this.getChunkProvider(saveDirectory);
 		if(var9) {
-			field_9430_x = true;
 			this.spawnX = 0;
 			this.spawnY = 64;
 
 			for(this.spawnZ = 0; !this.findSpawn(this.spawnX, this.spawnZ); this.spawnZ += this.rand.nextInt(64) - this.rand.nextInt(64)) {
 				this.spawnX += this.rand.nextInt(64) - this.rand.nextInt(64);
 			}
-			field_9430_x = false;
 		}
 
 		this.calculateInitialSkylight();
-	}
-	
-	public IChunkProvider getChunkProvider() {
-		return chunkProvider;
 	}
 
 	protected IChunkProvider getChunkProvider(String var1) {
@@ -177,12 +170,7 @@ public class World implements IBlockAccess {
 				this.playerEntity.readFromNBT(this.nbtCompoundPlayer);
 				this.nbtCompoundPlayer = null;
 			}
-			if (chunkProvider instanceof ChunkProviderLoadOrGenerate) {
-				ChunkProviderLoadOrGenerate chunkproviderloadorgenerate = (ChunkProviderLoadOrGenerate) chunkProvider;
-				int i = MathHelper.floor_float((int) playerEntity.posX) >> 4;
-				int j = MathHelper.floor_float((int) playerEntity.posZ) >> 4;
-				chunkproviderloadorgenerate.func_21110_c(i, j);
-			}
+
 			this.spawnEntityInWorld(this.playerEntity);
 		} catch (Exception var2) {
 			var2.printStackTrace();

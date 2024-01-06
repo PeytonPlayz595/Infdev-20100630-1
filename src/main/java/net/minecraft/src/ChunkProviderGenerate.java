@@ -600,6 +600,10 @@ public class ChunkProviderGenerate implements IChunkProvider {
 		return true;
 	}
 
+	public boolean unload100OldestChunks() {
+		return false;
+	}
+
 	public boolean canSave() {
 		return true;
 	}

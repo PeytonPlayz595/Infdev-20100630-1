@@ -478,17 +478,6 @@ public class Minecraft implements Runnable {
 
 	public void runTick() {
 		this.ingameGUI.updateTick();
-		
-		if (thePlayer != null) {
-			IChunkProvider ichunkprovider = theWorld.getChunkProvider();
-			if (ichunkprovider instanceof ChunkProviderLoadOrGenerate) {
-				ChunkProviderLoadOrGenerate chunkproviderloadorgenerate = (ChunkProviderLoadOrGenerate) ichunkprovider;
-				int j = MathHelper.floor_float((int) thePlayer.posX) >> 4;
-				int i1 = MathHelper.floor_float((int) thePlayer.posZ) >> 4;
-				chunkproviderloadorgenerate.func_21110_c(j, i1);
-			}
-		}
-		
 		if(!this.isGamePaused && this.theWorld != null) {
 			this.playerController.onUpdate();
 		}
