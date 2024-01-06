@@ -1,6 +1,8 @@
 package net.PeytonPlayz585.opengl;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.Charset;
@@ -63,8 +65,6 @@ import net.minecraft.src.MathHelper;
 import static org.teavm.jso.webgl.WebGLRenderingContext.*;
 import static net.PeytonPlayz585.opengl.WebGL2RenderingContext.*;
 import static net.PeytonPlayz585.opengl.RealOpenGLEmuns.*;
-
-
 
 public class LWJGLMain {
 	public static final boolean _wisWebGL() {

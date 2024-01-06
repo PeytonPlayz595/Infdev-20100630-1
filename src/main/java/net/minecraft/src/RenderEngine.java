@@ -13,6 +13,18 @@ import net.PeytonPlayz585.opengl.MinecraftImageData;
 
 public class RenderEngine {
 
+	public RenderEngine(GameSettings gamesettings) {
+		textureMap = new HashMap<String, Integer>();
+		textureNameToImageMap = new HashMap<Integer, MinecraftImageData>();
+		singleIntBuffer = GLAllocation.createIntBuffer(1);
+		imageDataB1 = GLAllocation.createByteBuffer(0x100000);
+		imageDataB2 = GLAllocation.createByteBuffer(0x100000);
+		textureList = new ArrayList<TextureFX>();
+		clampTexture = false;
+		blurTexture = false;
+		options = gamesettings;
+	}
+
 	public int getTexture(String s) {
 		Integer integer = (Integer) textureMap.get(s);
 		if (integer != null) {
@@ -94,7 +106,7 @@ public class RenderEngine {
 			int l1 = ai[l] >> 16 & 0xff;
 			int j2 = ai[l] >> 8 & 0xff;
 			int l2 = ai[l] >> 0 & 0xff;
-			if (Minecraft.getMinecraft().gameSettings.anaglyph) {
+			if (options != null && options.anaglyph) {
 				int j3 = (l1 * 30 + j2 * 59 + l2 * 11) / 100;
 				int l3 = (l1 * 30 + j2 * 70) / 100;
 				int j4 = (l1 * 30 + l2 * 70) / 100;
@@ -174,12 +186,13 @@ public class RenderEngine {
 	}
 
 	public static boolean useMipmaps = false;
-	private static HashMap<String, Integer> textureMap = new HashMap<String, Integer>();
-	private HashMap<Integer, MinecraftImageData> textureNameToImageMap = new HashMap<Integer, MinecraftImageData>();
-	private IntBuffer singleIntBuffer = GLAllocation.createIntBuffer(1);
-	private ByteBuffer imageDataB1 = GLAllocation.createByteBuffer(0x100000);
-	private ByteBuffer imageDataB2 = GLAllocation.createByteBuffer(0x100000);
-	private java.util.List<TextureFX> textureList = new ArrayList<TextureFX>();
-	private boolean clampTexture = false;
-	private boolean blurTexture = false;
+	private static HashMap<String, Integer> textureMap;
+	private HashMap<Integer, MinecraftImageData> textureNameToImageMap;
+	private IntBuffer singleIntBuffer;
+	private ByteBuffer imageDataB1;
+	private ByteBuffer imageDataB2;
+	private java.util.List<TextureFX> textureList;
+	private GameSettings options;
+	private boolean clampTexture;
+	private boolean blurTexture;
 }
