@@ -40,7 +40,7 @@ public class World implements IBlockAccess {
 	public int spawnZ;
 	public boolean isNewWorld;
 	private List worldAccesses;
-	public IChunkProvider chunkProvider;
+	private IChunkProvider chunkProvider;
 	private static String saveDirectory;
 	public long randomSeed;
 	private NBTTagCompound nbtCompoundPlayer;
